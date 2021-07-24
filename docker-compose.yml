@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+
+  mongodb:
+    image: 'mongo'
+    environment:
+    - cluster.name=zemli
+    - MONGO_INITDB_DATABASE=zemli-db
+    - MONGO_INITDB_ROOT_USERNAME=admin
+    - MONGO_INITDB_ROOT_PASSWORD=!pa$$word
+    volumes:
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+      - mongo-volume:/data/db
+    ports:
+      - '27017-27019:27017-27019'
+    networks:
+      - zemli
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo mongo:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+volumes:
+  mongo-volume:
+    driver: local
+
+networks:
+  zemli:
+    driver: bridge
